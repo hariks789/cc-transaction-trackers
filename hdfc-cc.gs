@@ -73,8 +73,8 @@ function processTransactionEmails() {
   let messages = getRelevantMessages();
   let records = parseMessageData(messages);
   console.log("records", records.length, records); // logs the number of records and the parsed data for debugging purposes
-  // saveDataToSheet(records); // saves the parsed data to Google Sheets (commented out for now)
-  // labelMessagesAsDone(messages); // labels the relevant messages as processed (commented out for now)
+  saveDataToSheet(records); // saves the parsed data to Google Sheets (commented out for now)
+  labelMessagesAsDone(messages); // labels the relevant messages as processed (commented out for now)
   return true; // returns true to indicate that the function has completed successfully
 }
 
