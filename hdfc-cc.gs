@@ -1,6 +1,16 @@
-// This function retrieves the relevant email threads using Gmail search and returns their messages as an array
+const SPREADSHEET_URL =
+  'YOUR_SHEET_URL';
+const SHEET_NAME = 'Transactions'; //Update if your sheetname is different
+const QUERY =
+  'newer_than:2d AND in:all AND from:hdfcbank.net AND subject:Alert : Update on your HDFC Bank Credit Card AND -label:hdfc_processed';
+const REGEX =
+  /([0-9]+) for Rs[.]* ([+-]?(?=\.\d|\d)(?:\d+)?(?:\.?\d*)) at ([a-zA-Z0-9 $!@#$&-_.]+) on (\d{1,2}-\d{1,2}-\d{4} \d{1,2}:\d{2}:\d{2})/;
+const DATE_FORMAT = 'es-CL';
+const LABEL_NAME = 'hdfc_processed';
+
+
 function getRelevantMessages() {
-  const threads = GmailApp.search("newer_than:2d AND in:all AND from:hdfcbank.net AND subject:Alert : Update on your HDFC Bank Credit Card AND -label:hdfc_processed", 0, 100);
+  const threads = GmailApp.search(QUERY, 0, 100);
   
   console.log('Emails', threads.length); // logs the number of email threads retrieved
   
@@ -25,7 +35,7 @@ function parseMessageData(messages) {
   
   messages.forEach((message) => { // iterates through each message to extract the required data
     const text = message.getPlainBody().replace(/(\r\n|\n|\r)/gm, ""); // gets the plain text version of the message body and removes line breaks
-    const matches = text.match(/([0-9]+) for Rs[.]* ([+-]?(?=\.\d|\d)(?:\d+)?(?:\.?\d*)) at ([a-zA-Z0-9 $!@#$&-_.]+) on (\d{1,2}-\d{1,2}-\d{4} \d{1,2}:\d{2}:\d{2})/); // uses a regular expression to match the required data in the text
+    const matches = text.match(REGEX); // uses a regular expression to match the required data in the text
     
     if (!matches || matches.length < 5) {
       console.log('Match failed', matches, text); // logs the failed matches for debugging purposes
@@ -61,8 +71,8 @@ function getParsedDataDisplay() {
 
 // This function saves the parsed data to a Google Sheets spreadsheet
 const saveDataToSheet = (records) => {
-  const spreadsheet = SpreadsheetApp.openByUrl(<URL>);
-  const sheet = spreadsheet.getSheetByName(`Transactions`);
+  const spreadsheet = SpreadsheetApp.openByUrl(SPREADSHEET_URL);
+  const sheet = spreadsheet.getSheetByName(SHEET_NAME);
   records.forEach(record => {
     sheet.appendRow([record.date, record.card, record.merchant, record.amount]); // appends a row to the "Transactions" sheet with the required data
   });
@@ -80,7 +90,7 @@ function processTransactionEmails() {
 
 // This function labels the given messages as processed by adding a custom label to their threads
 function labelMessagesAsDone(messages) {
-  const labelName = 'hdfc_processed';
+  const labelName = LABEL_NAME;
   let label = GmailApp.getUserLabelByName(labelName);
   
   if (!label) { // creates the custom label if it doesn't already exist
