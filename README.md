@@ -10,7 +10,7 @@ Added Scripts for
 ## American Express Credit Cards
 ## IndusInd Debit Cards
 
-## Axis - Additional Steps
+## Axis & IDFC - Additional Steps
 For Axis add moment js to App Script
 
 Steps to add moment
