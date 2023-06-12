@@ -27,3 +27,4 @@ Now Moment is available in your project
 1. Consistent date format for all cards --> DD-MM-YY hh:mm:ss
 2. Common functions and global variables
 3. Add support for IDFC, SBI etc
+4. Anniversary and FY total spends tracker
