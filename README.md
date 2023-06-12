@@ -18,6 +18,8 @@ Steps to add moment
 1. Tap on Libraries + button
 2. Paste `15hgNOjKHUG4UtyZl9clqBbl23sDvWMS8pfDJOyIapZk5RBqwL3i-rlCo` and press look up
 3. Select version 9 and press add
+<img width="600" alt="app-script-moment-lib-add" src="https://github.com/hariks789/cc-transaction-trackers/assets/22391855/06d4148f-30ef-4e19-a713-fe220110b43e">
+
 Now Moment is available in your project
 
 
