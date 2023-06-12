@@ -1,12 +1,11 @@
-const QUERY = "newer_than:2d AND in:all AND from:axisbank.com AND subject:Transaction alert AND -label:axis_processed"
-const REGEX = /Card no.\s(XX\d+)\sfor\sINR\s([0-9,]*\.*[0-9]*)\sat\s+(.+?)\son\s(\d+-\d+-\d+\s\d+:\d+:\d+)/;
-const SPREADSHEET_URL = 'URL';
+const QUERY = "newer_than:1d AND in:all AND from:idfcfirstbank.com AND subject:Debit Alert: Your IDFC FIRST Bank Credit Card AND -label:idfc_processed"
+const REGEX = /INR ([0-9]*\.[0-9]+)\s+([a-zA-Z]+\s+)+(XX[0-9]+) at ([A-Za-z0-9 @&$-_]+) on ([0-9A-Z-]+) at\s([0-9A-Z-:\s]+)/;
+const SPREADSHEET_URL = 'SHEET-LINK';
 const SHEET_NAME = 'Transactions'; //Update if your sheetname is different
-const LABEL_NAME = 'axis_processed';
-const DATE_FORMAT = 'es-CL';
+const LABEL_NAME = 'idfc_processed';
 
 function getRelevantMessages() {
-  const threads = GmailApp.search(QUERY, 0, 300);
+  const threads = GmailApp.search(QUERY, 0, 100);
   console.log('Emails', threads.length);
   const messages = threads.reduceRight(
     (acc, thread) => [...acc, ...thread.getMessages()],
@@ -24,13 +23,12 @@ const parseMessageData = (messages = []) => {
     const textWithoutBreaks = text.replace(/(\r|\n|\r|\*)/gm, '');
     const matches = textWithoutBreaks.match(REGEX);
 
-    if (!matches || matches?.length < 5) {
+    if (!matches || matches?.length < 6) {
       return;
     }
 
-    const { 1: card, 2: amount, 3: merchant, 4: date } = matches;
-
-    var formattedDate = Moment.moment(date, "DD-MM-YY hh:mm:ss").format('DD-MM-YYYY hh:mm:ss');
+    const { 1: amount, 5: date, 6: time, 3: card, 4: merchant } = matches;
+    const formattedDate = Moment.moment(`${date} ${time}`, 'DD-MMM-YYYY hh:mm A').format('DD-MM-YYYY hh:mm:ss');
 
     records.push({
       card,
@@ -42,7 +40,6 @@ const parseMessageData = (messages = []) => {
 
   return records;
 };
-
 function getMessagesDisplay() {
   const templ = HtmlService.createTemplateFromFile('messages');
   templ.messages = getRelevantMessages();
