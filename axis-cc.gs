@@ -1,5 +1,5 @@
 const QUERY = "newer_than:2d AND in:all AND from:axisbank.com AND subject:Transaction alert AND -label:axis_processed"
-const REGEX = /Card no.\s(XX\d+)\sfor\sINR\s([0-9,]*\.*[0-9]*)\sat\s+(.+?)\son\s(\d+-\d+-\d+\s\d+:\d+:\d+)/;
+const REGEX = /Card no.\s(XX\d+)\sfor\s([A-Z]{3})\s([0-9,]*\.*[0-9]*)\sat\s+(.+?)\son\s(\d+-\d+-\d+\s\d+:\d+:\d+)/;
 const SPREADSHEET_URL = 'URL';
 const SHEET_NAME = 'Transactions'; //Update if your sheetname is different
 const LABEL_NAME = 'axis_processed';
@@ -28,7 +28,7 @@ const parseMessageData = (messages = []) => {
       return;
     }
 
-    const { 1: card, 2: amount, 3: merchant, 4: date } = matches;
+    const { 1: card, 3: amount, 4: merchant, 5: date, 2: currency } = matches;
 
     var formattedDate = Moment.moment(date, "DD-MM-YY hh:mm:ss").format('DD-MM-YYYY hh:mm:ss');
 
@@ -37,6 +37,7 @@ const parseMessageData = (messages = []) => {
       amount,
       date: formattedDate,
       merchant,
+      currency
     });
   });
 
@@ -64,6 +65,7 @@ function saveDataToSheet(records) {
       records[r].card,
       records[r].merchant,
       records[r].amount,
+      records[r].currency,
     ]);
   }
 }

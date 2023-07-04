@@ -1,5 +1,5 @@
 const QUERY = "newer_than:1d AND in:all AND from:idfcfirstbank.com AND subject:Debit Alert: Your IDFC FIRST Bank Credit Card AND -label:idfc_processed"
-const REGEX = /INR ([0-9]*\.[0-9]+)\s+([a-zA-Z]+\s+)+(XX[0-9]+) at ([A-Za-z0-9 @&$-_]+) on ([0-9A-Z-]+) at\s([0-9A-Z-:\s]+)/;
+const REGEX = /([A-Z]{3}) ([0-9]*\.[0-9]+)\s+([a-zA-Z]+\s+)+(XX[0-9]+) at ([A-Za-z0-9 @&$-_]+) on ([0-9A-Z-]+) at\s([0-9A-Z-:\s]+)/;
 const SPREADSHEET_URL = 'SHEET-LINK';
 const SHEET_NAME = 'Transactions'; //Update if your sheetname is different
 const LABEL_NAME = 'idfc_processed';
@@ -27,7 +27,7 @@ const parseMessageData = (messages = []) => {
       return;
     }
 
-    const { 1: amount, 5: date, 6: time, 3: card, 4: merchant } = matches;
+    const { 2: amount, 6: date, 7: time, 4: card, 5: merchant, 1: currency } = matches;
     const formattedDate = Moment.moment(`${date} ${time}`, 'DD-MMM-YYYY hh:mm A').format('DD-MM-YYYY hh:mm:ss');
 
     records.push({
@@ -35,6 +35,7 @@ const parseMessageData = (messages = []) => {
       amount,
       date: formattedDate,
       merchant,
+      currency,
     });
   });
 
@@ -61,6 +62,7 @@ function saveDataToSheet(records) {
       records[r].card,
       records[r].merchant,
       records[r].amount,
+      records[r].currency,
     ]);
   }
 }
