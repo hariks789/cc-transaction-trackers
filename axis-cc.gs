@@ -1,5 +1,5 @@
 const QUERY = "newer_than:2d AND in:all AND from:axisbank.com AND subject:Transaction alert AND -label:axis_processed"
-const REGEX = /Card no.\s(XX\d+)\sfor\s([A-Z]{3})\s([0-9,]*\.*[0-9]*)\sat\s+(.+?)\son\s(\d+-\d+-\d+\s\d+:\d+:\d+)/;
+const REGEX = /ard no.\s(XX\d+)\sfor\s([A-Z]{3})\s([0-9,]*\.*[0-9]*)\sat\s+(.+?)\son\s(\d+-\d+-\d+\s\d+:\d+:\d+)/;
 const SPREADSHEET_URL = 'URL';
 const SHEET_NAME = 'Transactions'; //Update if your sheetname is different
 const LABEL_NAME = 'axis_processed';
