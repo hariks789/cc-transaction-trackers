@@ -3,8 +3,8 @@ const SPREADSHEET_URL =
 const SHEET_NAME = 'Transactions'; //Update if your sheetname is different
 const QUERY =
   'newer_than:300d AND in:all AND from:americanexpress.com AND subject:"Your transaction update" AND -label:amex_processed';
-const REGEX =
-  /in\s([0-9]+)[a-zA-Z.\s:]+([0-9A-Za-z ,]+)Merchant:([0-9a-zA-Z\s@$.&_-]+):INR\s([0-9,]*.[0-9]+)/;
+  const REGEX =
+  /in\s([0-9]+)\.?\s.*?Date:([0-9]+ [A-Za-z]+, [0-9]+)(?:.*?Merchant:([A-Za-z0-9\s@$.&_-]+))?.*?Amount:INR\s([0-9,]+\.[0-9]+)/;
 const DATE_FORMAT = 'es-CL';
 const LABEL_NAME = 'amex_processed';
 
@@ -40,12 +40,13 @@ const parseMessageData = (messages = []) => {
       minute: 'numeric',
       second: 'numeric',
     }).format(reportedTimeObj);
+    const merchantValue = merchant ?? "Unknown Merchant";
 
     records.push({
       card,
       amount,
       date: `${dateFormatted} ${timeFormatted}`,
-      merchant,
+      merchant: merchantValue,
       reportedTime: reportedTimeObj.toISOString(),
     });
   });
