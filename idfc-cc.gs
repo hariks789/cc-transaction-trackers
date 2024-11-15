@@ -1,5 +1,5 @@
 const QUERY = "newer_than:1d AND in:all AND from:idfcfirstbank.com AND subject:Debit Alert: Your IDFC FIRST Bank Credit Card AND -label:idfc_processed"
-const REGEX = /([A-Z]{3}) ([0-9]*\.[0-9]+)\s+([a-zA-Z]+\s+)+(XX[0-9]+) at ([A-Za-z0-9 @&$-_]+) on ([0-9A-Z-]+) at\s([0-9A-Z-:\s]+)/;
+const REGEX = /([A-Z]{3}) ([0-9]*\.[0-9]+)\s+([a-zA-Z]+\s+)+(XX[0-9]+)\.?\s+at ([A-Za-z0-9 .@&$-_]+)\s+on ([0-9A-Z-]+)\s*(at\s*[0-9A-Z-:\s]*)?/;
 const SPREADSHEET_URL = 'SHEET-LINK';
 const SHEET_NAME = 'Transactions'; //Update if your sheetname is different
 const LABEL_NAME = 'idfc_processed';
