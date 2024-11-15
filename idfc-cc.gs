@@ -28,8 +28,15 @@ const parseMessageData = (messages = []) => {
     }
 
     const { 2: amount, 6: date, 7: time, 4: card, 5: merchant, 1: currency } = matches;
-    const formattedDate = Moment.moment(`${date} ${time}`, 'DD-MMM-YYYY hh:mm A').format('DD-MM-YYYY hh:mm:ss');
+    // Get the email delivery time as a fallback
+    const deliveryTime = message.getDate();
+    const deliveryTimeFormatted = Moment.moment(deliveryTime).format('DD-MM-YYYY hh:mm:ss');
 
+    // Format the date and time
+    const formattedDate = time
+      ? Moment.moment(`${date} ${time.trim()}`, 'DD-MMM-YYYY hh:mm A').format('DD-MM-YYYY hh:mm:ss')
+      : deliveryTimeFormatted;
+    
     records.push({
       card,
       amount,
