@@ -2,9 +2,10 @@ const SPREADSHEET_URL =
   'YOUR_SHEET_URL';
 const SHEET_NAME = 'Transactions'; //Update if your sheetname is different
 const QUERY =
-  'newer_than:2d AND in:all AND from:hdfcbank.net AND subject:Alert : Update on your HDFC Bank Credit Card AND -label:hdfc_processed';
-const REGEX =
+  'newer_than:30d AND in:all AND from:hdfcbank.net AND (subject:"Alert : Update on your HDFC Bank Credit Card" OR subject:"debited via Credit Card") AND -label:hdfc_processed';
+const REGEX_OLD =
   /([0-9]+) for Rs[.]* ([+-]?(?=\.\d|\d)(?:\d+)?(?:\.?\d*)) at ([a-zA-Z0-9 $!@#$&-_.]+) on (\d{1,2}-\d{1,2}-\d{4} \d{1,2}:\d{2}:\d{2})/;
+const REGEX_NEW = /Rs\.([0-9,.]+) is debited from your HDFC Bank Credit Card ending ([0-9]+) towards ([A-Za-z0-9\s\-_]+) on (\d{2}\s+[A-Za-z]+,?\s+\d{4}\s+at\s+\d{2}:\d{2}:\d{2})/;
 const DATE_FORMAT = 'es-CL';
 const LABEL_NAME = 'hdfc_processed';
 
@@ -25,6 +26,25 @@ function getRelevantMessages() {
 }
 
 // This function parses the required data from each message and returns it as an array of objects
+function formatDate(dateStr, isNewFormat) {
+  if (isNewFormat) {
+    // Convert "13 Sep, 2025 at 22:58:37" to "13-09-2025 22:58:37"
+    const months = {
+      'Jan': '01', 'Feb': '02', 'Mar': '03', 'Apr': '04', 'May': '05', 'Jun': '06',
+      'Jul': '07', 'Aug': '08', 'Sep': '09', 'Oct': '10', 'Nov': '11', 'Dec': '12'
+    };
+    
+    const match = dateStr.match(/(\d{2})\s+([A-Za-z]+),?\s+(\d{4})\s+at\s+(\d{2}:\d{2}:\d{2})/);
+    if (match) {
+      const [_, day, month, year, time] = match;
+      return `${day}-${months[month]}-${year} ${time}`;
+    }
+  } else {
+    return dateStr;
+  }
+  return dateStr; // fallback
+}
+
 function parseMessageData(messages) {
   const records = [];
   
@@ -35,18 +55,27 @@ function parseMessageData(messages) {
   
   messages.forEach((message) => { // iterates through each message to extract the required data
     const text = message.getPlainBody().replace(/(\r\n|\n|\r)/gm, ""); // gets the plain text version of the message body and removes line breaks
-    const matches = text.match(REGEX); // uses a regular expression to match the required data in the text
+    
+    // Try the new format first
+    let matches = text.match(REGEX_NEW);
+    let isNewFormat = true;
+    
+    // If new format doesn't match, try the old format
+    if (!matches || matches.length < 5) {
+      matches = text.match(REGEX_OLD);
+      isNewFormat = false;
+    }
     
     if (!matches || matches.length < 5) {
-      console.log('Match failed', matches, text); // logs the failed matches for debugging purposes
+      console.log('Match failed for both formats', text); // logs the failed matches for debugging purposes
       return; // continues with the next message if there is no match or incomplete match
     }
 
     const rec = {
-      amount: matches[2], // extracts the amount from the second match group
-      card: matches[1], // extracts the card number from the first match group
-      date: matches[4], // extracts the date from the fourth match group
-      merchant: matches[3].trim(), // extracts the merchant name from the third match group and removes leading/trailing spaces
+      amount: isNewFormat ? matches[1].replace(/,/g, '') : matches[2], // For new format, remove commas from amount
+      card: isNewFormat ? matches[2] : matches[1], // Card number position differs in formats
+      date: formatDate(matches[4], isNewFormat), // Standardize date format
+      merchant: matches[3].trim(), // Merchant is in position 3 for both formats
     };
     
     records.push(rec); // adds the extracted data as an object to the records array
